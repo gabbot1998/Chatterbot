@@ -125,17 +125,13 @@ singleWildcardMatch, longerWildcardMatch :: Eq a => [a] -> [a] -> Maybe [a]
 singleWildcardMatch (wc:ps) (x:xs)
   | ps == xs = Just [x]
   | otherwise = Nothing
-{- TO BE WRITTEN -}
-longerWildcardMatch (wc:ps) (x:xs)
- | ps == xs &&  = Just xs
- | xs /= [] = longerWildcardMatch ()
-{- TO BE WRITTEN -}
 
-reversePeel :: Eq a => a -> [a] -> [a] -> Maybe [a]
-reversePeel wc (p:ps) (x:xs)
-  | p == wc && ((length xs) /= 1) = Just (reverse (x:xs))
-  | p == x = reversePeel wc ps xs
-  | otherwise = Nothing
+longerWildcardMatch (wc:ps) word
+ | matchLen == 1 = Nothing
+ | drop matchLen word == ps = Just (take matchLen word)
+ | otherwise = Nothing
+ where matchLen = (length word - length ps)
+
 
 
 -- Test cases --------------------
