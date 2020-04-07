@@ -126,6 +126,7 @@ singleWildcardMatch (wc:ps) (x:xs)
   | ps == xs = Just [x]
   | otherwise = Nothing
 
+
 longerWildcardMatch (wc:ps) word
  | matchLen == 1 = Nothing
  | drop matchLen word == ps = Just (take matchLen word)
