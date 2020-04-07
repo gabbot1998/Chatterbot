@@ -66,7 +66,7 @@ present :: Phrase -> String
 present = unwords
 
 prepare :: String -> Phrase
-prepare = reduce . words . map toLower . filter (not . flip elem ".,:;*!#%&|") 
+prepare = reduce . words . map toLower . filter (not . flip elem ".,:;*!#%&|")
 
 rulesCompile :: [(String, [String])] -> BotBrain
 {- TO BE WRITTEN -}
@@ -105,24 +105,37 @@ reductionsApply _ = id
 
 -- Replaces a wildcard in a list with the list given as the third argument
 substitute :: Eq a => a -> [a] -> [a] -> [a]
-substitute _ _ _ = []
+substitute wildcard (x:xs) sub
+  | x == wildcard && xs == [] = sub
+  | x == wildcard = sub ++ substitute wildcard xs sub
+  | xs == [] = [x]
+  | otherwise = [x] ++ substitute wildcard xs sub
 {- TO BE WRITTEN -}
 
 
 -- Tries to match two lists. If they match, the result consists of the sublist
 -- bound to the wildcard in the pattern list.
 match :: Eq a => a -> [a] -> [a] -> Maybe [a]
-match _ _ _ = Nothing
+match wildcard p s = Nothing
 {- TO BE WRITTEN -}
 
 
 -- Helper function to match
 singleWildcardMatch, longerWildcardMatch :: Eq a => [a] -> [a] -> Maybe [a]
-singleWildcardMatch (wc:ps) (x:xs) = Nothing
+singleWildcardMatch (wc:ps) (x:xs)
+  | ps == xs = Just [x]
+  | otherwise = Nothing
 {- TO BE WRITTEN -}
-longerWildcardMatch (wc:ps) (x:xs) = Nothing
+longerWildcardMatch (wc:ps) (x:xs)
+ | ps == xs &&  = Just xs
+ | xs /= [] = longerWildcardMatch ()
 {- TO BE WRITTEN -}
 
+reversePeel :: Eq a => a -> [a] -> [a] -> Maybe [a]
+reversePeel wc (p:ps) (x:xs)
+  | p == wc && ((length xs) /= 1) = Just (reverse (x:xs))
+  | p == x = reversePeel wc ps xs
+  | otherwise = Nothing
 
 
 -- Test cases --------------------
@@ -153,5 +166,3 @@ transformationApply _ _ _ _ = Nothing
 transformationsApply :: Eq a => a -> ([a] -> [a]) -> [([a], [a])] -> [a] -> Maybe [a]
 transformationsApply _ _ _ _ = Nothing
 {- TO BE WRITTEN -}
-
-
