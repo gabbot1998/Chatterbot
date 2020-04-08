@@ -116,24 +116,35 @@ substitute wildcard (x:xs) sub
 -- Tries to match two lists. If they match, the result consists of the sublist
 -- bound to the wildcard in the pattern list.
 match :: Eq a => a -> [a] -> [a] -> Maybe [a]
-match wildcard p s = Nothing
-{- TO BE WRITTEN -}
+match _ [] [] = Just []
+match wildcard _ [] = Nothing
+match wildcard [] _ = Nothing
+match wildcard (p:ps) (x:xs)
+  | wildcard == p = orElse (singleWildcardMatch (p:ps) (x:xs)) (longerWildcardMatch (p:ps) (x:xs))
+  | p == x = match wildcard ps xs
+  | otherwise = Nothing
+
+--Bygga en model som jämför förlust per distans och vind modell
 
 
 -- Helper function to match
 singleWildcardMatch, longerWildcardMatch :: Eq a => [a] -> [a] -> Maybe [a]
-singleWildcardMatch (wc:ps) (x:xs)
-  | ps == xs = Just [x]
+singleWildcardMatch (wc:ps) (x:xs) = mmap (const [x] ) (match wc ps xs)
+longerWildcardMatch (wc:ps) (x:xs) = mmap (x: ) (match wc (wc:ps) xs)
+
+
+--longerWildcardMatch (wc:ps) word
+-- | matchLen == 1 = Nothing
+-- | drop matchLen word == ps = Just (take (matchLen -1) word)
+-- | otherwise = match wc ps word
+-- where matchLen = (length word - length ps)
+
+
+longerWildcardMatch (wc:ps) (x:xs)
+  | ps == [] && xs /= [] = Just (x:xs)
+  | xs == [] = Nothing
+  | last ps == last xs = longerWildcardMatch (init (wc:ps)) (init (x:xs))
   | otherwise = Nothing
-
-
-longerWildcardMatch (wc:ps) word
- | matchLen == 1 = Nothing
- | drop matchLen word == ps = Just (take matchLen word)
- | otherwise = Nothing
- where matchLen = (length word - length ps)
-
-
 
 -- Test cases --------------------
 
@@ -155,11 +166,13 @@ matchCheck = matchTest == Just testSubstitutions
 
 -- Applying a single pattern
 transformationApply :: Eq a => a -> ([a] -> [a]) -> [a] -> ([a], [a]) -> Maybe [a]
-transformationApply _ _ _ _ = Nothing
+transformationApply wildcard f s (t1, t2) = mmap (substitute wildcard t2) (mmap f (match wildcard t1 s))
 {- TO BE WRITTEN -}
-
 
 -- Applying a list of patterns until one succeeds
 transformationsApply :: Eq a => a -> ([a] -> [a]) -> [([a], [a])] -> [a] -> Maybe [a]
-transformationsApply _ _ _ _ = Nothing
-{- TO BE WRITTEN -}
+transformationsApply _ _ [] _ = Nothing
+transformationsApply wildcard f tl@(t:ts) s
+  | transformationApply wildcard f s t == Nothing = transformationsApply wildcard f ts s
+  | transformationApply wildcard f s t /= Nothing = transformationApply wildcard f s t
+  | otherwise = Nothing
