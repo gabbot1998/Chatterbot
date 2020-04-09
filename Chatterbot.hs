@@ -29,14 +29,9 @@ stateOfMind :: BotBrain -> IO (Phrase -> Phrase)
 {- TO BE WRITTEN -}
 stateOfMind _ = return id
 
---transformationsApply wildcard f tl@(t:ts) s
-
 rulesApply :: [PhrasePair] -> Phrase -> Phrase
-{- TO BE WRITTEN -}
-rulesApply pp p
- | ans /= Nothing = mmap reflect ans
- | otherwise = p
-  where ans = words transformationsApply '*' id (map (\x -> (unwords (fst x), unwords (snd x) )) pp) (unwords p)
+rulesApply pp p = maybe (reflect p) id (transformationsApply "*" reflect (map (\x -> (fst x, snd x)) pp) p) -- returns p if Nothing (this funciton is eld)
+
 
 --reflect :: Phrase -> Phrase
 {- TO BE WRITTEN -}
