@@ -29,13 +29,24 @@ stateOfMind :: BotBrain -> IO (Phrase -> Phrase)
 {- TO BE WRITTEN -}
 stateOfMind _ = return id
 
+--transformationsApply wildcard f tl@(t:ts) s
+
 rulesApply :: [PhrasePair] -> Phrase -> Phrase
 {- TO BE WRITTEN -}
-rulesApply _ = id
+rulesApply pp p
+ | ans /= Nothing = mmap reflect ans
+ | otherwise = p
+  where ans = words transformationsApply '*' id (map (\x -> (unwords (fst x), unwords (snd x) )) pp) (unwords p)
 
-reflect :: Phrase -> Phrase
+--reflect :: Phrase -> Phrase
 {- TO BE WRITTEN -}
-reflect = id
+reflect = map (switch reflections)
+
+switch :: [(String, String)] -> String -> String
+switch [] word  = word
+switch ((s1, s2):ss) word
+ | word == s1 = s2
+ | otherwise = switch ss word
 
 reflections =
   [ ("am",     "are"),
