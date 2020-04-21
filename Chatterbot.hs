@@ -27,11 +27,17 @@ type BotBrain = [(Phrase, [Phrase])]
 
 stateOfMind :: BotBrain -> IO (Phrase -> Phrase)
 {- TO BE WRITTEN -}
-stateOfMind _ = return id
+stateOfMind brain = do
+  (map (\p -> ((fst p), (snd p) !! >>= (getRandom (length (snd p))))) brain)
+
 
 rulesApply :: [PhrasePair] -> Phrase -> Phrase
 rulesApply pp p = maybe (reflect p) id (transformationsApply "*" reflect (map (\x -> (fst x, snd x)) pp) p) -- returns p if Nothing (this funciton is eld)
 
+getRandom :: Int -> IO Int
+getRandom x = do
+  r <- randomIO :: IO Float
+  return (floor (r*(fromIntegral x) + 1))
 
 --reflect :: Phrase -> Phrase
 {- TO BE WRITTEN -}
