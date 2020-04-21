@@ -22,17 +22,29 @@ type Phrase = [String]
 type PhrasePair = (Phrase, Phrase)
 type BotBrain = [(Phrase, [Phrase])]
 
+--( stateOfMind [("Hej", ["Hej1", "Hej2"]), ("Hejdå"), ["Hejdå1"]] ) "Hejdå"
+--[("hej", ["Hej1"])]
+
+
 
 --------------------------------------------------------
 
 stateOfMind :: BotBrain -> IO (Phrase -> Phrase)
 {- TO BE WRITTEN -}
 stateOfMind brain = do
-  (map (\p -> ((fst p), (snd p) !! >>= (getRandom (length (snd p))))) brain)
-
+  phrasePairList <- listTransformer brain []
+  return (rulesApply phrasePairList)
 
 rulesApply :: [PhrasePair] -> Phrase -> Phrase
-rulesApply pp p = maybe (reflect p) id (transformationsApply "*" reflect (map (\x -> (fst x, snd x)) pp) p) -- returns p if Nothing (this funciton is eld)
+rulesApply pp p = transformationsApply "*" reflect
+--rulesApply pp p = maybe (reflect p) id (transformationsApply "*" reflect (map (\x -> (fst x, snd x)) pp) []) -- returns p if Nothing (this funciton is eld)
+
+listTransformer :: BotBrain -> [PhrasePair] -> IO [PhrasePair]
+listTransformer [] target = return target
+listTransformer (p:ps) target = do
+  r <- randomIO :: IO Float
+  listTransformer ps (target ++ [(fst p, pick r (snd p))])
+
 
 getRandom :: Int -> IO Int
 getRandom x = do
@@ -141,7 +153,7 @@ match wildcard (p:ps) (x:xs)
 
 -- Helper function to match
 singleWildcardMatch, longerWildcardMatch :: Eq a => [a] -> [a] -> Maybe [a]
-singleWildcardMatch (wc:ps) (x:xs) = mmap (const [x] ) (match wc ps xs)
+singleWildcardMatch (wc:ps) (x:xs) = mmap (const [x]) (match wc ps xs)
 longerWildcardMatch (wc:ps) (x:xs) = mmap (x: ) (match wc (wc:ps) xs)
 
 

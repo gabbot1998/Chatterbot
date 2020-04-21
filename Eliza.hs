@@ -3,8 +3,7 @@ import Chatterbot
 main = chatterbot "Eliza" eliza
 
 eliza = [
-  ("",
-      ["Speak up! I can't hear you."]),
+  ("", ["Speak up! I can't hear you."]),
 
   ("I need *",
       ["Why do you need * ?",
@@ -215,4 +214,3 @@ eliza = [
        "How does that make you feel?",
        "How do you feel when you say that?"])
   ]
-
