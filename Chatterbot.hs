@@ -30,14 +30,14 @@ type BotBrain = [(Phrase, [Phrase])]
 --------------------------------------------------------
 
 stateOfMind :: BotBrain -> IO (Phrase -> Phrase)
-{- TO BE WRITTEN -}
+
 stateOfMind brain = do
   phrasePairList <- listTransformer brain []
   return (rulesApply phrasePairList)
 
 
 rulesApply :: [PhrasePair] -> Phrase -> Phrase
-rulesApply pp p = maybe [] id (transformationsApply "*" reflect (map (\x -> (fst x, snd x)) pp) []) -- returns p if Nothing (this funciton is eld)
+rulesApply pp p = maybe [] id (transformationsApply "*" reflect pp p) -- returns p if Nothing (this funciton is eld) 
 
 listTransformer :: BotBrain -> [PhrasePair] -> IO [PhrasePair]
 listTransformer [] target = return target
@@ -52,7 +52,6 @@ getRandom x = do
   return (floor (r*(fromIntegral x) + 1))
 
 reflect :: Phrase -> Phrase
-{- TO BE WRITTEN -}
 reflect = map (switch reflections)
 
 switch :: [(String, String)] -> String -> String
@@ -91,12 +90,11 @@ present = unwords
 
 prepare :: String -> Phrase
 prepare = reduce . words . map toLower . filter (not . flip elem ".,:;*!#%&|")
-{-
+
 rulesCompile :: [(String, [String])] -> BotBrain
-{- TO BE WRITTEN -}
-rulesCompile _ = []
-rulesCompile (p:ps) = [((words (fst p)), (map words (snd p)))] ++ rulesCompile ps
--}
+rulesCompile [] = []
+rulesCompile (p:ps) = [ ( (words (map toLower (fst p))), (map words (map (map toLower) (snd p))) ) ] ++ rulesCompile ps
+
 --------------------------------------
 
 
@@ -117,11 +115,10 @@ reductions = (map.map2) (words, words)
 
 reduce :: Phrase -> Phrase
 reduce = reductionsApply reductions
-
+-- can you please tell me what Haskell is? NO!
 reductionsApply :: [PhrasePair] -> Phrase -> Phrase
-{- TO BE WRITTEN -}
-reductionsApply _ = id
-
+reductionsApply pp p = (fix . try . (transformationsApply "*" id)) pp p
+reductionsApply = fix . try . transformationsApply "*" id
 
 -------------------------------------------------------
 -- Match and substitute
@@ -134,7 +131,7 @@ substitute wildcard (x:xs) sub
   | x == wildcard = sub ++ substitute wildcard xs sub
   | xs == [] = [x]
   | otherwise = [x] ++ substitute wildcard xs sub
-{- TO BE WRITTEN -}
+
 
 
 -- Tries to match two lists. If they match, the result consists of the sublist
@@ -155,14 +152,6 @@ match wildcard (p:ps) (x:xs)
 singleWildcardMatch, longerWildcardMatch :: Eq a => [a] -> [a] -> Maybe [a]
 singleWildcardMatch (wc:ps) (x:xs) = mmap (const [x]) (match wc ps xs)
 longerWildcardMatch (wc:ps) (x:xs) = mmap (x: ) (match wc (wc:ps) xs)
-
-
---longerWildcardMatch (wc:ps) word
--- | matchLen == 1 = Nothing
--- | drop matchLen word == ps = Just (take (matchLen -1) word)
--- | otherwise = match wc ps word
--- where matchLen = (length word - length ps)
-
 
 longerWildcardMatch (wc:ps) (x:xs)
   | ps == [] && xs /= [] = Just (x:xs)
@@ -191,7 +180,6 @@ matchCheck = matchTest == Just testSubstitutions
 -- Applying a single pattern
 transformationApply :: Eq a => a -> ([a] -> [a]) -> [a] -> ([a], [a]) -> Maybe [a]
 transformationApply wildcard f s (t1, t2) = mmap (substitute wildcard t2) (mmap f (match wildcard t1 s))
-{- TO BE WRITTEN -}
 
 -- Applying a list of patterns until one succeeds
 transformationsApply :: Eq a => a -> ([a] -> [a]) -> [([a], [a])] -> [a] -> Maybe [a]
@@ -201,7 +189,7 @@ transformationsApply wildcard f tl@(t:ts) s
   | transformationApply wildcard f s t /= Nothing = transformationApply wildcard f s t
   | otherwise = Nothing
 
-{-
+{- 
 module Chatterbot where
 import Utilities
 import System.Random
@@ -228,8 +216,8 @@ type BotBrain = [(Phrase, [Phrase])]
 
 
 --------------------------------------------------------
--}
-{-
+
+
 -- Takes a brain, and returns a function that which in turn takes phrase and returns a phrase (random response).
 -- Map the function that maps (id, pick r) over each tuple in the brain, feed it to rulesApply and return a random response.
 stateOfMind :: BotBrain -> IO (Phrase -> Phrase)
@@ -237,10 +225,11 @@ stateOfMind brain =
    do
      r <- randomIO :: IO Float
      return (rulesApply ((map . map2) (id, pick r) brain))
--}
-{-
+
+
 -- Returns a function that takes a Phrase (List of strings (words)) and returns the lookedup phrase in some dictionary, and applies reflect on the intermediate result before returning it. It applies a rule to a lookedup value.
 -- Returns a partially applied function.
+
 rulesApply :: [PhrasePair] -> Phrase -> Phrase
 rulesApply = try . transformationsApply "*" (reflect)
 
@@ -280,11 +269,11 @@ present = unwords
 
 prepare :: String -> Phrase
 prepare = reduce . words . map toLower . filter (not . flip elem ".,:;*!#%&|")
--}
+
 -- Takes eliza structure and converts it to a bot brain
 rulesCompile :: [(String, [String])] -> BotBrain
 rulesCompile = (map . map2) ((words . map toLower), map words)
-{-
+
 --------------------------------------
 
 
@@ -368,4 +357,5 @@ transformationApply wildcard func target (key, value) = mmap (substitute wildcar
 -- Applying a list of patterns until one succeeds
 transformationsApply :: Eq a => a -> ([a] -> [a]) -> [([a], [a])] -> [a] -> Maybe [a]
 transformationsApply wildcard fun dictionary lookupList = foldl1 orElse (map (transformationApply wildcard fun lookupList) dictionary)
--}
+
+ -}
