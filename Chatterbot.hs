@@ -37,7 +37,7 @@ stateOfMind brain = do
 
 
 rulesApply :: [PhrasePair] -> Phrase -> Phrase
-rulesApply pp p = maybe [] id (transformationsApply "*" reflect pp p) -- returns p if Nothing (this funciton is eld) 
+rulesApply pp p = maybe [] id (transformationsApply "*" reflect pp p) -- returns p if Nothing (this funciton is eld)
 
 listTransformer :: BotBrain -> [PhrasePair] -> IO [PhrasePair]
 listTransformer [] target = return target
@@ -117,7 +117,6 @@ reduce :: Phrase -> Phrase
 reduce = reductionsApply reductions
 -- can you please tell me what Haskell is? NO!
 reductionsApply :: [PhrasePair] -> Phrase -> Phrase
-reductionsApply pp p = (fix . try . (transformationsApply "*" id)) pp p
 reductionsApply = fix . try . transformationsApply "*" id
 
 -------------------------------------------------------
@@ -185,11 +184,11 @@ transformationApply wildcard f s (t1, t2) = mmap (substitute wildcard t2) (mmap 
 transformationsApply :: Eq a => a -> ([a] -> [a]) -> [([a], [a])] -> [a] -> Maybe [a]
 transformationsApply _ _ [] _ = Nothing
 transformationsApply wildcard f tl@(t:ts) s
-  | transformationApply wildcard f s t == Nothing = transformationsApply wildcard f ts s
+  | transformationApply wildcard f s t == Nothing  = transformationsApply wildcard f ts s
   | transformationApply wildcard f s t /= Nothing = transformationApply wildcard f s t
   | otherwise = Nothing
 
-{- 
+{-
 module Chatterbot where
 import Utilities
 import System.Random
