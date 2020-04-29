@@ -49,7 +49,7 @@ listTransformer (p:ps) target = do
 getRandom :: Int -> IO Int
 getRandom x = do
   r <- randomIO :: IO Float
-  return (floor (r*(fromIntegral x) + 1))
+  return (floor (r * fromIntegral x + 1))
 
 reflect :: Phrase -> Phrase
 reflect = map (switch reflections)
@@ -92,9 +92,12 @@ prepare :: String -> Phrase
 prepare = reduce . words . map toLower . filter (not . flip elem ".,:;*!#%&|")
 
 rulesCompile :: [(String, [String])] -> BotBrain
-rulesCompile [] = []
-rulesCompile (p:ps) = [ ( (words (map toLower (fst p))), (map words (map (map toLower) (snd p))) ) ] ++ rulesCompile ps
-
+rulesCompile = foldr
+        (\ p
+           -> (++)
+                [((words (map toLower (fst p))),
+                  (map (words . map toLower) (snd p)))])
+        []
 --------------------------------------
 
 
@@ -129,7 +132,7 @@ substitute wildcard (x:xs) sub
   | x == wildcard && xs == [] = sub
   | x == wildcard = sub ++ substitute wildcard xs sub
   | xs == [] = [x]
-  | otherwise = [x] ++ substitute wildcard xs sub
+  | otherwise = x : substitute wildcard xs sub
 
 
 
@@ -185,8 +188,7 @@ transformationsApply :: Eq a => a -> ([a] -> [a]) -> [([a], [a])] -> [a] -> Mayb
 transformationsApply _ _ [] _ = Nothing
 transformationsApply wildcard f tl@(t:ts) s
   | transformationApply wildcard f s t == Nothing  = transformationsApply wildcard f ts s
-  | transformationApply wildcard f s t /= Nothing = transformationApply wildcard f s t
-  | otherwise = Nothing
+  | otherwise = transformationApply wildcard f s t
 
 {-
 module Chatterbot where
